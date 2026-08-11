@@ -58,5 +58,5 @@ class Attendance(models.Model):
     student = models.ForeignKey(StudentProfile , on_delete=models.CASCADE , related_name="student_attendance")
 
     subject = models.CharField(max_length=100)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateField()
     is_present = models.BooleanField(max_length=20  )

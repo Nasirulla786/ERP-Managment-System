@@ -23,6 +23,7 @@ class FacultyProfileSerializer(serializers.ModelSerializer):
 
 
 class AttendanceSerialize(serializers.ModelSerializer):
+    student = StudentProfileSerializer(read_only=True)
     class Meta:
         model = Attendance
         fields = ["id" ,"student","subject" ,"date" ,"is_present"]

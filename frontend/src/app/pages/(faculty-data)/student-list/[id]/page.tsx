@@ -15,6 +15,8 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
   const [totalAttendance, setTotalAttendance] = useState([])
   const [fromBackendAttendance, setFromBackendAttendance] = useState([])
+  const [selectData, setSelectData] = useState(new Date().toISOString().split("T")[0])
+  const [attendance, setAttendance] = useState<any>({});
 
 
   useEffect(() => {
@@ -43,7 +45,7 @@ const Page = () => {
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const res = await api.get(`/get-attendance/${subject}/`, { withCredentials: true })
+        const res = await api.get(`/get-attendance/${subject}/?date=${selectData}`, { withCredentials: true })
         // console.log("this is",res)
         setFromBackendAttendance(res.data)
 
@@ -54,7 +56,7 @@ const Page = () => {
     }
     fetchAttendance()
 
-  }, [])
+  }, [subject , selectData])
 
 
   const handleSubmit = async () => {
@@ -62,10 +64,17 @@ const Page = () => {
     const res = await api.post("/mark-attendance/", totalAttendance, { withCredentials: true })
     console.log("this is ", res)
 
+    const response = await api.get(
+      `/get-attendance/${subject}/?date=${selectData}`,
+      { withCredentials: true }
+    );
+
+    setFromBackendAttendance(response.data);
+
   };
 
 
-  const [attendance, setAttendance] = useState<any>({});
+
 
   useEffect(() => {
     const data: any = {};
@@ -89,9 +98,19 @@ const Page = () => {
 
       {/* HEADER */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800">
+      <div className="w-full flex items-center justify-between ">
+      <h1 className="text-3xl font-bold text-slate-800">
           Attendance
         </h1>
+
+
+        <div >
+          <input type="date"  value={selectData} onChange={(e:any)=>setSelectData(e.target.value)}/>
+
+
+
+        </div>
+      </div>
 
         <p className="mt-1 text-sm text-slate-500">
           Subject: {subject}
@@ -184,7 +203,8 @@ const Page = () => {
                         const obj = {
                           is_present: e.target.checked,
                           subject: subject,
-                          student: student?.id
+                          student: student?.id,
+                              date: selectData
                         }
 
                         setTotalAttendance((pre: any) => {

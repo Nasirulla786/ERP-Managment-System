@@ -167,8 +167,27 @@ class CreateAttendance(APIView):
 
 class GetAttendance(APIView):
     def get(self , request , subject):
-        myAttendance = Attendance.objects.filter(subject=subject)
+        date = request.GET.get("date")
+        myAttendance = Attendance.objects.filter(subject=subject ,date=date)
         serialize = AttendanceSerialize(myAttendance , many=True)
         return Response(
             serialize.data,
+        )
+
+
+
+class AttendanceHistory(APIView):
+
+    def get(self, request):
+
+        attendance = Attendance.objects.all().order_by("-date")
+
+        serializer = AttendanceSerialize(
+            attendance,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
         )
