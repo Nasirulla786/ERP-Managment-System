@@ -79,13 +79,7 @@ const Page = () => {
       color: "bg-red-500",
       sendLink: "/pages/notices",
     },
-    {
-      title: "Reports",
-      desc: "Department analytics and reports",
-      icon: BarChart3,
-      color: "bg-indigo-500",
-      sendLink: "/pages/reports",
-    },
+
   ];
 
   return (

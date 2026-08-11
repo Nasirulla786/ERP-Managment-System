@@ -15,7 +15,7 @@ export default function RegisterPage() {
 
     try {
 
-      const response = await api.post("/register/", {
+     await api.post("/register/", {
         username,
         email,
         password,
@@ -33,59 +33,72 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex h-screen w-screen items-center justify-center ">
+    <div className="flex h-screen w-screen items-center justify-center bg-slate-50 font-sans">
 
-      <div className="w-[380px] rounded-xl bg-white p-8 shadow-xl">
+      <div className="w-[400px] rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/60">
 
         {/* Logo */}
-        <div className="flex flex-col items-center">
-          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-orange-400 via-red-400 to-blue-500" />
-          <h1 className="mt-3 text-xl font-medium text-slate-700">
-            ERP Maestro
+        <div className="flex flex-col items-center gap-">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-700 shadow-lg shadow-indigo-200">
+            <span className="text-lg font-bold text-white">CF</span>
+          </div>
+        <div className="flex gap-1 flex-col">
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-800 text-center" >
+            Campus Flow
           </h1>
-          <p className="mt-1 text-xs tracking-wide text-slate-400">
+          <p className="mt-1 text-xs font-medium tracking-widest text-slate-400 text-center">
             CREATE YOUR ACCOUNT
           </p>
         </div>
+        </div>
 
-        <div className="mt-6 flex flex-col gap-3">
+        <div className="mt-8 flex flex-col gap-4">
 
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full rounded-md border border-indigo-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-slate-600">Username</label>
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-indigo-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-slate-600">Email</label>
+            <input
+              type="email"
+              placeholder="you@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-indigo-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
-          />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-slate-600">Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
 
         </div>
 
         <button
           onClick={handleRegister}
-          className="mt-6 w-full rounded-md bg-indigo-500 py-2 text-sm font-medium tracking-wide text-white hover:bg-indigo-600"
+          className="mt-7 w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold tracking-wide text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-lg active:scale-[0.98] cursor-pointer"
         >
           REGISTER
         </button>
 
-        <p className="mt-5 text-center text-xs text-slate-500">
+        <p className="mt-6 text-center text-xs text-slate-500">
           Already have an account?{" "}
-          <a href="/login" className="text-indigo-500 hover:underline">
+          <a href="/login" className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
             Login here
           </a>
         </p>

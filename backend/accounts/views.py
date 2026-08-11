@@ -137,6 +137,15 @@ class ProfileView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
+            profileExist = Profile.objects.filter(role=role)
+            if profileExist:
+                 return Response(
+                    {"message": "Role already Exists"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+
+
             profile = Profile.objects.create(
                 role = role,
                 user = request.user
@@ -144,7 +153,31 @@ class ProfileView(APIView):
 
             serialize = RoleSerlizer(profile)
 
+
             return Response({"data":serialize.data} , status = status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
             return Response({"message":"Internal server error"})
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+
+class LogoutView(APIView):
+
+    def post(self, request):
+
+        response = Response(
+            {
+                "message": "Logout successful"
+            },
+            status=status.HTTP_200_OK
+        )
+
+        response.delete_cookie("access_token")
+        response.delete_cookie("refresh_token")
+
+        return response

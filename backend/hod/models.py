@@ -85,3 +85,57 @@ class Subject(models.Model):
 
     def __str__(self):
         return f"{self.subject_code} - {self.name}"
+
+
+
+
+from django.db import models
+
+
+class DepartmentNotice(models.Model):
+
+    title = models.CharField(max_length=200)
+
+    description = models.TextField()
+
+    department = models.CharField(max_length=100 , null=True , blank=True)
+
+    created_by = models.ForeignKey(
+        HODProfile,
+        on_delete=models.CASCADE,
+        related_name="notices"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+
+
+class TimetableEntry(models.Model):
+    DAY_CHOICES = [
+        ("Monday", "Monday"),
+        ("Tuesday", "Tuesday"),
+        ("Wednesday", "Wednesday"),
+        ("Thursday", "Thursday"),
+        ("Friday", "Friday"),
+        ("Saturday", "Saturday"),
+    ]
+
+    department = models.CharField(max_length=100)
+    day = models.CharField(max_length=20, choices=DAY_CHOICES)
+
+    subject = models.CharField(max_length=100)
+    faculty = models.CharField(max_length=100)
+
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    room = models.CharField(max_length=100, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.day} - {self.subject}"

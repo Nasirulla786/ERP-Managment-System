@@ -45,80 +45,93 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen w-screen bg-white">
-
-      {/* Left blue strip */}
-      <div className="w-3 " />
+    <div className="flex h-screen w-screen bg-white font-sans">
 
       {/* Left form panel */}
-      <div className="flex w-[500px] flex-col px-10 pt-16">
+      <div className="flex w-full flex-col justify-center px-10 sm:w-[480px] sm:px-14">
 
-        {/* Logo */}
-        <div className="flex flex-col items-center">
-          <div className="h-16 w-16 rounded-full bg-gradient-to-br from-orange-400 via-red-400 to-blue-500" />
-          <h1 className="mt-3 text-2xl font-medium text-slate-700">
-            ERP Raaz
-          </h1>
-        </div>
+        <div className="mx-auto w-full max-w-[340px]">
 
-        <hr className="mt-8 border-slate-200" />
+          {/* Logo */}
+          <div className="flex flex-col items-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-700 shadow-lg shadow-indigo-200">
+              <span className="text-lg font-bold text-white">EM</span>
+            </div>
+            <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-800">
+              ERP Raaz
+            </h1>
+            <p className="mt-1 text-xs font-medium tracking-widest text-slate-400">
+              WELCOME BACK
+            </p>
+          </div>
 
-        <div className="mt-8 rounded-md bg-slate-50 p-6">
+          <div className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
 
-          <p className="text-center text-xs font-semibold tracking-wide text-slate-500">
-            PLEASE LOGIN
-          </p>
+            <p className="text-center text-xs font-semibold tracking-wide text-slate-500">
+              PLEASE LOGIN
+            </p>
 
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="mt-4 w-full rounded-md border border-indigo-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
-          />
+            <div className="mt-5 flex flex-col gap-3.5">
 
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-3 w-full rounded-md border border-indigo-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
-          />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-slate-600">Username</label>
+                <input
+                  type="text"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
 
-          <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="h-4 w-4 accent-indigo-500"
-            />
-            Remember Me
-          </label>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-slate-600">Password</label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
 
-        </div>
+            </div>
 
-        <button
-          onClick={handleLogin}
-          className="mt-8 w-full rounded-md bg-indigo-400 py-2 text-sm font-medium tracking-wide text-white hover:bg-indigo-500"
-        >
-          LOGIN
-        </button>
+            <label className="mt-4 flex items-center gap-2 text-xs font-medium text-slate-600">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-3.5 w-3.5 accent-indigo-600"
+              />
+              Remember Me
+            </label>
 
-        <hr className="mt-8 border-slate-200" />
+          </div>
 
-        <div className="mt-4 flex justify-between text-xs">
-          <Link  href={"/register"} className="text-indigo-500 hover:underline">
-            Sing Up
-          </Link >
+          <button
+            onClick={handleLogin}
+            className="mt-6 w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold tracking-wide text-white shadow-md shadow-indigo-200 transition-all hover:bg-indigo-700 hover:shadow-lg active:scale-[0.98]"
+          >
+            LOGIN
+          </button>
+
+          <div className="mt-6 flex items-center justify-center gap-1 text-xs text-slate-500">
+            <span>Don&apos;t have an account?</span>
+            <Link href={"/register"} className="font-medium text-indigo-600 hover:text-indigo-700 hover:underline">
+              Sign Up
+            </Link>
+          </div>
 
         </div>
 
       </div>
 
       {/* Right image panel */}
-      <div className="hidden sm:flex relative flex-1 bg-red-500" />
-
-      <Image src={bg} alt="None" className=" h-full w-full object-cover hidden sm:flex" />
+      <div className="relative hidden flex-1 sm:flex">
+        <Image src={bg} alt="None" fill className="object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/40 via-transparent to-transparent" />
+      </div>
 
     </div>
   );

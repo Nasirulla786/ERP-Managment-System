@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateFacultyProfile , GetCurrentFaculty , UpdateSubject , MyStudents , GetMyDepartmentSubjects , CreateAttendance , GetAttendance , AttendanceHistory
+from .views import CreateFacultyProfile , GetCurrentFaculty, UpdateSubject , MyStudents , GetMyDepartmentSubjects , CreateAttendance , GetAttendance , AttendanceHistory
 
 urlpatterns = [
     path("faculty-profile/", CreateFacultyProfile.as_view()),

@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from .models import HODProfile , Subject
+
+
+from faculty.serializer import FacultyProfileSerializer
+from .models import DepartmentNotice, HODProfile , Subject, TimetableEntry
 from student.serializer import ProfileSerilzer
 
 
@@ -34,4 +37,38 @@ class SubjectSerializer(serializers.ModelSerializer):
             "semester",
             "total_marks",
             "subject_type",
+        ]
+
+
+
+class DepartmentNoticeSerializer(serializers.ModelSerializer):
+    created_by  = HODProfileSerializer(read_only=True)
+
+    class Meta:
+        model = DepartmentNotice
+        fields = [
+            "id",
+            "title",
+            "description",
+            "department",
+            "created_at",
+             "created_by"
+        ]
+
+
+
+class TimetableEntrySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TimetableEntry
+        fields = [
+            "id",
+            "department",
+            "day",
+            "subject",
+            "faculty",
+            "start_time",
+            "end_time",
+            "room",
+            "created_at",
         ]

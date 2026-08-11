@@ -7,8 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 
 
 
-from hod.models import Subject
-from hod.serializer import SubjectSerializer
+from hod.models import Subject, TimetableEntry
+from hod.serializer import SubjectSerializer, TimetableEntrySerializer
 from student.models import StudentProfile
 from student.serializer import StudentProfileSerializer
 from .models import Attendance, FacultyProfile
@@ -191,3 +191,7 @@ class AttendanceHistory(APIView):
             serializer.data,
             status=status.HTTP_200_OK
         )
+
+
+
+

@@ -2,7 +2,8 @@
 
 import api from "@/app/lib/axios";
 import { setUserData } from "@/redux/slices/userdata";
-import { GraduationCap, Users, ShieldCheck } from "lucide-react";
+import axios from "axios";
+import { GraduationCap, Users, ShieldCheck, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -37,6 +38,8 @@ export default function RolePage() {
   const handleContinue = async () => {
     if (!selectedRole) return;
 
+  try {
+
     const res = await api.post("/profile/" ,{role:selectedRole} ,{withCredentials:true})
     console.log(res)
     if (res.status==201){
@@ -44,49 +47,70 @@ export default function RolePage() {
         router.push("/")
     }
 
-    else{
-        toast.error("something went wrong")
-    }
+  } catch (error:any) {
+    toast.error(error.response.data.message)
+
+  }
+
+
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-5">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-5 py-16 font-sans">
       <div className="w-full max-w-5xl">
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-gray-800">
-            Select Your Role
-          </h1>
 
-          <p className="text-gray-500 mt-3">
-            Choose your role to continue your ERP onboarding.
+        <div className="flex flex-col items-center text-center mb-12">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-blue-700 shadow-lg shadow-indigo-200">
+            <span className="text-sm font-bold text-white">EM</span>
+          </div>
+          <p className="mt-4 text-xs font-medium tracking-widest text-indigo-500">
+            STEP 2 OF 2
+          </p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-800">
+            Select your role
+          </h1>
+          <p className="text-slate-500 mt-2 text-sm">
+            Choose how you&apos;ll be using ERP Maestro. This sets up your workspace.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-5">
           {roles.map((role) => {
             const Icon = role.icon;
+            const isSelected = selectedRole === role.id;
 
             return (
               <button
                 key={role.id}
                 onClick={() => setSelectedRole(role.id)}
-                className={`rounded-2xl bg-white p-8 border-2 transition-all duration-200 hover:-translate-y-2 hover:shadow-xl text-left ${
-                  selectedRole === role.id
-                    ? "border-blue-600 shadow-xl"
-                    : "border-gray-200"
+                className={`group relative cursor-pointer rounded-2xl bg-white p-7 border text-left transition-all duration-200 ${
+                  isSelected
+                    ? "border-indigo-500 shadow-lg shadow-indigo-100 ring-1 ring-indigo-500"
+                    : "border-slate-200 hover:border-indigo-200 hover:shadow-md"
                 }`}
               >
-                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-6">
-                  <Icon className="text-blue-600" size={32} />
+                <div
+                  className={`h-9 w-9 rounded-lg flex items-center justify-center mb-5 transition-colors ${
+                    isSelected ? "bg-indigo-600" : "bg-slate-100 group-hover:bg-indigo-50"
+                  }`}
+                >
+                  <Icon
+                    className={isSelected ? "text-white" : "text-slate-500 group-hover:text-indigo-600"}
+                    size={18}
+                  />
                 </div>
 
-                <h2 className="text-2xl font-bold text-gray-800">
+                <h2 className="text-base font-semibold text-slate-800">
                   {role.title}
                 </h2>
 
-                <p className="text-gray-500 mt-3">
+                <p className="text-slate-500 mt-1.5 text-sm leading-relaxed">
                   {role.description}
                 </p>
+
+                {isSelected && (
+                  <div className="absolute top-5 right-5 h-2 w-2 rounded-full bg-indigo-600" />
+                )}
               </button>
             );
           })}
@@ -96,9 +120,10 @@ export default function RolePage() {
           <button
             disabled={!selectedRole}
             onClick={handleContinue}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-10 py-3 rounded-xl font-semibold transition"
+            className="group flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg text-sm font-semibold tracking-wide shadow-md shadow-indigo-200 disabled:shadow-none transition-all cursor-pointer"
           >
             Continue
+            <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
           </button>
         </div>
       </div>

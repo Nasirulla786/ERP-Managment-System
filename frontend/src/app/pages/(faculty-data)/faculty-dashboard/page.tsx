@@ -2,6 +2,7 @@
 "use client";
 
 import useCurrentFaculty from "@/app/hooks/useCurrentFaculty";
+import api from "@/app/lib/axios";
 import { RootState } from "@/redux/store";
 import {
   BookOpen,
@@ -19,7 +20,16 @@ import {
   BookMarked,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+
+interface Notice {
+  id: number;
+  title: string;
+  description: string;
+  department: string;
+  created_at: string;
+}
 
 const Page = () => {
   useCurrentFaculty();
@@ -28,13 +38,36 @@ const Page = () => {
     (state: RootState) => state.faculty
   );
 
-  console.log(facultyData);
+  const [notices, setNotices] = useState<Notice[]>([]);
+  const [noticeLoading, setNoticeLoading] = useState(true);
+
+  /*
+   * Fetch department notices
+   */
+  useEffect(() => {
+    fetchNotices();
+  }, []);
+
+  const fetchNotices = async () => {
+    try {
+      const res = await api.get("/department-notices/", {
+        withCredentials: true,
+      });
+
+      setNotices(res.data);
+    } catch (error) {
+      console.log("Notice fetch error:", error);
+    } finally {
+      setNoticeLoading(false);
+    }
+  };
 
   if (!facultyData) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
+
           <p className="mt-4 text-sm text-slate-500">
             Loading faculty dashboard...
           </p>
@@ -98,11 +131,9 @@ const Page = () => {
         </div>
       </div>
 
-
       {/* ================= MAIN ================= */}
 
       <div className="mx-auto max-w-7xl px-6 py-8">
-
 
         {/* ================= PROFILE + SUBJECT ================= */}
 
@@ -123,6 +154,7 @@ const Page = () => {
               <div className="flex-1">
 
                 <div className="flex items-center gap-2">
+
                   <UserRound
                     size={18}
                     className="text-indigo-600"
@@ -131,6 +163,7 @@ const Page = () => {
                   <span className="text-sm font-medium text-indigo-600">
                     Faculty Member
                   </span>
+
                 </div>
 
                 <h2 className="mt-2 text-2xl font-bold text-slate-800">
@@ -160,7 +193,6 @@ const Page = () => {
             </div>
 
           </div>
-
 
           {/* ASSIGNED SUBJECT */}
 
@@ -193,7 +225,6 @@ const Page = () => {
           </div>
 
         </div>
-
 
         {/* ================= STATS ================= */}
 
@@ -233,12 +264,12 @@ const Page = () => {
 
         </div>
 
-
         {/* ================= QUICK ACTIONS ================= */}
 
         <div className="mt-10">
 
           <div className="mb-5">
+
             <h2 className="text-2xl font-bold text-slate-800">
               Quick Actions
             </h2>
@@ -246,8 +277,8 @@ const Page = () => {
             <p className="mt-1 text-sm text-slate-500">
               Frequently used faculty features
             </p>
-          </div>
 
+          </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -256,7 +287,7 @@ const Page = () => {
               description="View students assigned to you"
               icon={<Users size={25} />}
               className="bg-blue-100 text-blue-600"
-              sendLink = "/pages/my-students"
+              sendLink="/pages/my-students"
             />
 
             <ActionCard
@@ -264,7 +295,7 @@ const Page = () => {
               description="Mark and manage attendance"
               icon={<ClipboardCheck size={25} />}
               className="bg-green-100 text-green-600"
-              sendLink = "/pages/attendence-page"
+              sendLink="/pages/attendence-page"
             />
 
             <ActionCard
@@ -272,7 +303,7 @@ const Page = () => {
               description="Create and manage assignments"
               icon={<FileText size={25} />}
               className="bg-purple-100 text-purple-600"
-                sendLink = "/pages/assignment-page"
+              sendLink="/pages/assignment-page"
             />
 
             <ActionCard
@@ -280,18 +311,16 @@ const Page = () => {
               description="View your teaching schedule"
               icon={<CalendarDays size={25} />}
               className="bg-orange-100 text-orange-600"
-                sendLink = "/pages/timetable-page"
+              sendLink="/pages/timetable-page"
             />
 
           </div>
 
         </div>
 
-
         {/* ================= TODAY + NOTICES ================= */}
 
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
-
 
           {/* TODAY'S SCHEDULE */}
 
@@ -314,7 +343,6 @@ const Page = () => {
               </div>
 
             </div>
-
 
             <div className="mt-6">
 
@@ -339,8 +367,7 @@ const Page = () => {
 
           </div>
 
-
-          {/* NOTICES */}
+          {/* ================= NOTICES ================= */}
 
           <div className="rounded-2xl bg-white p-6 shadow-sm">
 
@@ -362,20 +389,49 @@ const Page = () => {
 
             </div>
 
+            {/* NOTICE DATA */}
 
             <div className="mt-6 space-y-3">
 
-              <Notice
-                title="No new notices"
-                description="New department announcements will appear here."
-              />
+              {noticeLoading ? (
+
+                <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
+
+                  <div className="mx-auto h-7 w-7 animate-spin rounded-full border-4 border-orange-100 border-t-orange-500" />
+
+                  <p className="mt-3 text-sm text-slate-500">
+                    Loading notices...
+                  </p>
+
+                </div>
+
+              ) : notices.length === 0 ? (
+
+                <Notice
+                  title="No new notices"
+                  description="New department announcements will appear here."
+                />
+
+              ) : (
+
+                notices.map((notice) => (
+
+                  <Notice
+                    key={notice.id}
+                    title={notice.title}
+                    description={notice.description}
+                    date={notice.created_at}
+                  />
+
+                ))
+
+              )}
 
             </div>
 
           </div>
 
         </div>
-
 
         {/* ================= ACADEMIC OVERVIEW ================= */}
 
@@ -399,7 +455,6 @@ const Page = () => {
 
           </div>
 
-
           <div className="mt-6 grid gap-4 md:grid-cols-3">
 
             <OverviewItem
@@ -420,7 +475,6 @@ const Page = () => {
           </div>
 
         </div>
-
 
         {/* ================= FOOTER STATUS ================= */}
 
@@ -456,14 +510,12 @@ const Page = () => {
 /* COMPONENTS */
 /* ================================================= */
 
-
 const StatCard = ({
   title,
   value,
   subtitle,
   icon,
   className,
-
 }: any) => {
 
   return (
@@ -503,11 +555,14 @@ const ActionCard = ({
   description,
   icon,
   className,
-    sendLink
+  sendLink,
 }: any) => {
 
   return (
-    <Link href={sendLink} className="group cursor-pointer rounded-2xl bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+    <Link
+      href={sendLink}
+      className="group cursor-pointer rounded-2xl bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+    >
 
       <div className="flex items-start justify-between">
 
@@ -538,24 +593,35 @@ const ActionCard = ({
 const Notice = ({
   title,
   description,
+  date,
 }: any) => {
 
   return (
-    <div className="flex items-start gap-4 rounded-xl border border-slate-100 p-4">
+    <div className="flex items-start gap-4 rounded-xl border border-slate-100 p-4 transition hover:bg-slate-50">
 
-      <div className="rounded-lg bg-slate-100 p-2 text-slate-500">
+      <div className="rounded-lg bg-orange-100 p-2 text-orange-600">
         <Megaphone size={18} />
       </div>
 
-      <div>
+      <div className="flex-1">
 
-        <p className="font-medium text-slate-700">
+        <p className="font-semibold text-slate-700">
           {title}
         </p>
 
         <p className="mt-1 text-sm text-slate-500">
           {description}
         </p>
+
+        {date && (
+          <p className="mt-2 text-xs text-slate-400">
+            {new Date(date).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </p>
+        )}
 
       </div>
 

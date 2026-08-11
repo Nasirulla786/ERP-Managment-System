@@ -6,6 +6,10 @@ from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework.permissions import IsAuthenticated
 
+from faculty.serializer import AttendanceSerialize
+from faculty.models import Attendance
+from hod.models import Subject
+from hod.serializer import SubjectSerializer
 from utils import upload_image
 from .serializer import StudentProfileSerializer
 from .models import StudentProfile
@@ -34,6 +38,15 @@ class CreateStudentProfile(APIView):
                     },
                     status=201
                 )
+        else:
+            return Response(
+                    {
+                        "message":serializer.error_messages
+
+                    },
+                    status=400
+                )
+
         return Response(
             serializer.errors,
             status=400
@@ -53,3 +66,54 @@ class GetCurrentStudent(APIView):
                     },
                     status=201
                 )
+
+
+
+class MySubjects(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        student = StudentProfile.objects.get(
+            profile=request.user.user_profile
+        )
+
+        subjects = Subject.objects.filter(
+            department=student.department
+        ).order_by("-created_at")
+
+        serializer = SubjectSerializer(
+            subjects,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
+
+
+class MyAttendance(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        student = StudentProfile.objects.get(
+            profile=request.user.user_profile
+        )
+
+        attendance = Attendance.objects.filter(
+            student=student
+        ).order_by("-date")
+
+        serializer = AttendanceSerialize(
+            attendance,
+            many=True
+        )
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK
+        )
