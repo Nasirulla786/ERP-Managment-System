@@ -1,7 +1,7 @@
-
 "use client";
 
 import api from "@/app/lib/axios";
+import Navbar from "@/app/components/Navbar";
 import { useEffect, useState } from "react";
 import {
   CalendarCheck,
@@ -9,6 +9,9 @@ import {
   XCircle,
   BookOpen,
   X,
+  TrendingUp,
+  Calendar,
+  AlertCircle,
 } from "lucide-react";
 
 interface Student {
@@ -35,10 +38,7 @@ const Page = () => {
   const [loading, setLoading] = useState(true);
 
   // Selected date for modal
-  const [selectedDate, setSelectedDate] =
-    useState<DateGroup | null>(null);
-
-  // ================= FETCH ATTENDANCE =================
+  const [selectedDate, setSelectedDate] = useState<DateGroup | null>(null);
 
   useEffect(() => {
     fetchAttendance();
@@ -51,7 +51,6 @@ const Page = () => {
       });
 
       console.log(response.data);
-
       setAttendance(response.data);
     } catch (error) {
       console.log(error);
@@ -60,32 +59,17 @@ const Page = () => {
     }
   };
 
-  // ================= OVERALL =================
-
   const totalClasses = attendance.length;
-
-  const presentClasses = attendance.filter(
-    (item) => item.is_present === true
-  ).length;
-
-  const absentClasses = attendance.filter(
-    (item) => item.is_present === false
-  ).length;
+  const presentClasses = attendance.filter((item) => item.is_present === true).length;
+  const absentClasses = attendance.filter((item) => item.is_present === false).length;
 
   const percentage =
-    totalClasses === 0
-      ? 0
-      : Math.round((presentClasses / totalClasses) * 100);
-
-  // ================= GROUP BY DATE =================
+    totalClasses === 0 ? 0 : Math.round((presentClasses / totalClasses) * 100);
 
   const dateGroups: Record<string, Attendance[]> = {};
 
   attendance.forEach((item) => {
-    // Ignore records where date is null
-    if (!item.date) {
-      return;
-    }
+    if (!item.date) return;
 
     if (!dateGroups[item.date]) {
       dateGroups[item.date] = [];
@@ -100,427 +84,244 @@ const Page = () => {
       records: dateGroups[date],
     }))
     .sort(
-      (a, b) =>
-        new Date(b.date).getTime() -
-        new Date(a.date).getTime()
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-
-  // ================= LOADING =================
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <p className="text-slate-500">
-          Loading attendance...
-        </p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-100">
+        <div className="text-center">
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-emerald-500/20 border-t-emerald-500 mb-3" />
+          <p className="text-xs font-semibold text-slate-400">Loading attendance history...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-6 py-8">
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 pb-16">
+      <Navbar role="Student" />
 
-      <div className="mx-auto max-w-6xl">
-
-        {/* ================= HEADER ================= */}
-
-        <div className="mb-8">
-
+      {/* Header Banner */}
+      <div className="bg-slate-900 border-b border-slate-800 py-8 px-4 sm:px-8">
+        <div className="mx-auto max-w-6xl">
           <div className="flex items-center gap-3">
-
-            <div className="rounded-xl bg-indigo-100 p-3 text-indigo-600">
-              <CalendarCheck size={25} />
+            <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+              <CalendarCheck size={22} />
             </div>
-
             <div>
-
-              <h1 className="text-3xl font-bold text-slate-800">
-                My Attendance
+              <h1 className="text-3xl font-black text-white tracking-tight">
+                My Attendance Record
               </h1>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Check your overall and date-wise attendance.
+              <p className="mt-1 text-xs text-slate-400">
+                Check overall percentage performance and date-wise session breakdown
               </p>
-
             </div>
-
           </div>
-
         </div>
+      </div>
 
-        {/* ================= OVERALL ATTENDANCE ================= */}
-
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
+      <div className="mx-auto max-w-6xl px-4 sm:px-8 mt-8 space-y-8">
+        {/* Overall Stats Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Percentage */}
-
-          <div className="rounded-2xl bg-indigo-600 p-6 text-white shadow-sm">
-
-            <p className="text-sm text-indigo-100">
+          <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/60 to-slate-900 p-6 shadow-xl text-white">
+            <p className="text-xs font-semibold text-emerald-300 uppercase tracking-wider">
               Overall Attendance
             </p>
-
-            <h2 className="mt-2 text-4xl font-bold">
-              {percentage}%
-            </h2>
-
-            <p className="mt-2 text-sm text-indigo-100">
-              Overall performance
-            </p>
-
+            <h2 className="mt-2 text-4xl font-black text-white">{percentage}%</h2>
+            <p className="mt-2 text-xs text-emerald-200/80">Academic standing status</p>
           </div>
 
           {/* Total */}
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-
-            <p className="text-sm text-slate-500">
-              Total Classes
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Total Sessions
             </p>
-
-            <h2 className="mt-2 text-3xl font-bold text-slate-800">
-              {totalClasses}
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-400">
-              Attendance records
-            </p>
-
+            <h2 className="mt-2 text-3xl font-black text-white">{totalClasses}</h2>
+            <p className="mt-1 text-xs text-slate-500">Attendance logs</p>
           </div>
 
           {/* Present */}
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-
-            <div className="flex items-center gap-2">
-
-              <CheckCircle2
-                size={19}
-                className="text-green-600"
-              />
-
-              <p className="text-sm text-slate-500">
-                Present
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl">
+            <div className="flex items-center gap-2 text-emerald-400">
+              <CheckCircle2 size={18} />
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Classes Present
               </p>
-
             </div>
-
-            <h2 className="mt-2 text-3xl font-bold text-green-600">
-              {presentClasses}
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-400">
-              Classes attended
-            </p>
-
+            <h2 className="mt-2 text-3xl font-black text-emerald-400">{presentClasses}</h2>
+            <p className="mt-1 text-xs text-slate-500">Classes attended</p>
           </div>
 
           {/* Absent */}
-
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-
-            <div className="flex items-center gap-2">
-
-              <XCircle
-                size={19}
-                className="text-red-600"
-              />
-
-              <p className="text-sm text-slate-500">
-                Absent
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl">
+            <div className="flex items-center gap-2 text-rose-400">
+              <XCircle size={18} />
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Classes Absent
               </p>
-
             </div>
-
-            <h2 className="mt-2 text-3xl font-bold text-red-600">
-              {absentClasses}
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-400">
-              Classes missed
-            </p>
-
+            <h2 className="mt-2 text-3xl font-black text-rose-400">{absentClasses}</h2>
+            <p className="mt-1 text-xs text-slate-500">Classes missed</p>
           </div>
-
         </div>
 
-        {/* ================= DATE WISE ================= */}
-
-        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
-
-          <div className="mb-6">
-
-            <h2 className="text-xl font-bold text-slate-800">
-              Attendance History
+        {/* Date Wise Attendance */}
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 sm:p-7 shadow-xl space-y-6">
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <Calendar size={18} className="text-emerald-400" />
+              Session Date History Log
             </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Click on a date to view your class-wise attendance.
+            <p className="text-xs text-slate-400">
+              Click on any date entry to view subject-wise attendance breakdown
             </p>
-
           </div>
 
           {groupedDates.length === 0 ? (
-
-            <div className="rounded-xl border border-dashed border-slate-200 p-10 text-center">
-
-              <CalendarCheck
-                size={40}
-                className="mx-auto text-slate-300"
-              />
-
-              <p className="mt-3 font-medium text-slate-600">
-                No dated attendance records
+            <div className="rounded-2xl border border-dashed border-slate-800 p-12 text-center text-slate-500">
+              <CalendarCheck size={40} className="mx-auto text-slate-700 mb-3" />
+              <p className="text-sm font-semibold text-slate-400">
+                No dated attendance records found
               </p>
-
-              <p className="mt-1 text-sm text-slate-400">
-                Attendance dates will appear here.
-              </p>
-
             </div>
-
           ) : (
-
             <div className="space-y-3">
-
               {groupedDates.map((group) => {
-
-                const present = group.records.filter(
-                  (item) => item.is_present
-                ).length;
-
-                const absent = group.records.filter(
-                  (item) => !item.is_present
-                ).length;
+                const present = group.records.filter((item) => item.is_present).length;
+                const absent = group.records.filter((item) => !item.is_present).length;
 
                 return (
-
                   <button
                     key={group.date}
                     onClick={() => setSelectedDate(group)}
-                    className="w-full rounded-xl border border-slate-200 p-4 text-left transition hover:border-indigo-300 hover:bg-indigo-50"
+                    className="w-full rounded-2xl border border-slate-800 bg-slate-950 p-4 text-left transition-all hover:border-emerald-500/40 hover:bg-slate-900 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
-
-                    <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-
-                      {/* DATE */}
-
-                      <div className="flex items-center gap-4">
-
-                        <div className="rounded-xl bg-indigo-100 p-3 text-indigo-600">
-                          <CalendarCheck size={22} />
-                        </div>
-
-                        <div>
-
-                          <p className="font-semibold text-slate-800">
-
-                            {new Date(
-                              group.date
-                            ).toLocaleDateString("en-IN", {
-                              weekday: "long",
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })}
-
-                          </p>
-
-                          <p className="mt-1 text-sm text-slate-500">
-                            {group.records.length} class
-                            {group.records.length > 1
-                              ? "es"
-                              : ""}
-                          </p>
-
-                        </div>
-
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-slate-900 border border-slate-800 text-emerald-400 flex items-center justify-center">
+                        <CalendarCheck size={20} />
                       </div>
-
-                      {/* STATUS */}
-
-                      <div className="flex items-center gap-2">
-
-                        {present > 0 && (
-                          <span className="rounded-full bg-green-50 px-3 py-1 text-sm font-medium text-green-600">
-                            {present} Present
-                          </span>
-                        )}
-
-                        {absent > 0 && (
-                          <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-medium text-red-600">
-                            {absent} Absent
-                          </span>
-                        )}
-
-                        <span className="ml-2 text-sm font-medium text-indigo-600">
-                          View
-                        </span>
-
+                      <div>
+                        <p className="font-bold text-white text-sm">
+                          {new Date(group.date).toLocaleDateString("en-IN", {
+                            weekday: "long",
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          })}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {group.records.length} {group.records.length > 1 ? "classes" : "class"} logged
+                        </p>
                       </div>
-
                     </div>
 
-                  </button>
+                    <div className="flex items-center gap-2 text-xs">
+                      {present > 0 && (
+                        <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 font-bold text-emerald-400">
+                          {present} Present
+                        </span>
+                      )}
 
+                      {absent > 0 && (
+                        <span className="rounded-full bg-rose-500/10 border border-rose-500/20 px-3 py-1 font-bold text-rose-400">
+                          {absent} Absent
+                        </span>
+                      )}
+
+                      <span className="ml-2 font-bold text-indigo-400">View Details →</span>
+                    </div>
+                  </button>
                 );
               })}
-
             </div>
-
           )}
-
         </div>
 
-        {/* ================= NULL DATE RECORDS ================= */}
-
+        {/* Null Date Notice */}
         {attendance.some((item) => item.date === null) && (
-
-          <div className="mt-5 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
-
-            <p className="text-sm font-medium text-yellow-700">
-              Note
-            </p>
-
-            <p className="mt-1 text-sm text-yellow-600">
-              Some attendance records do not have a date yet,
-              so they are not included in the date-wise history.
-            </p>
-
+          <div className="flex items-center gap-3 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-xs text-amber-400">
+            <AlertCircle size={18} className="shrink-0" />
+            <div>
+              <p className="font-bold text-white">System Note</p>
+              <p className="mt-0.5 text-amber-400/80">
+                Some overall percentage logs were recorded without an assigned date stamp.
+              </p>
+            </div>
           </div>
-
         )}
-
       </div>
 
-      {/* ================= MODAL ================= */}
-
+      {/* Modal Popup for Date Details */}
       {selectedDate && (
-
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-
-          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
-
-            {/* MODAL HEADER */}
-
-            <div className="flex items-center justify-between border-b border-slate-200 p-6">
-
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-xl rounded-3xl border border-slate-800 bg-slate-900 p-6 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div>
-
-                <h2 className="text-xl font-bold text-slate-800">
-                  Attendance Details
+                <h2 className="text-xl font-bold text-white">
+                  Class Session Attendance Details
                 </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-
-                  {new Date(
-                    selectedDate.date
-                  ).toLocaleDateString("en-IN", {
+                <p className="text-xs text-emerald-400 font-semibold mt-0.5">
+                  {new Date(selectedDate.date).toLocaleDateString("en-IN", {
                     weekday: "long",
                     day: "numeric",
                     month: "long",
                     year: "numeric",
                   })}
-
                 </p>
-
               </div>
 
               <button
                 onClick={() => setSelectedDate(null)}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white cursor-pointer"
               >
                 <X size={20} />
               </button>
-
             </div>
 
-            {/* MODAL BODY */}
-
-            <div className="max-h-[60vh] overflow-y-auto p-6">
-
-              <div className="space-y-3">
-
-                {selectedDate.records.map((item) => (
-
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-200 p-4"
-                  >
-
-                    {/* SUBJECT */}
-
-                    <div className="flex items-center gap-3">
-
-                      <div className="rounded-lg bg-indigo-100 p-2 text-indigo-600">
-                        <BookOpen size={18} />
-                      </div>
-
-                      <div>
-
-                        <p className="font-semibold text-slate-800">
-                          {item.subject}
-                        </p>
-
-                        <p className="text-xs text-slate-400">
-                          Attendance ID: {item.id}
-                        </p>
-
-                      </div>
-
+            <div className="max-h-[50vh] overflow-y-auto space-y-3 pr-1">
+              {selectedDate.records.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950 p-4 text-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-xl bg-slate-900 border border-slate-800 text-indigo-400 flex items-center justify-center">
+                      <BookOpen size={17} />
                     </div>
-
-                    {/* STATUS */}
-
-                    {item.is_present ? (
-
-                      <span className="inline-flex items-center gap-2 rounded-full bg-green-50 px-4 py-2 text-sm font-medium text-green-600">
-
-                        <CheckCircle2 size={16} />
-
-                        Present
-
-                      </span>
-
-                    ) : (
-
-                      <span className="inline-flex items-center gap-2 rounded-full bg-red-50 px-4 py-2 text-sm font-medium text-red-600">
-
-                        <XCircle size={16} />
-
-                        Absent
-
-                      </span>
-
-                    )}
-
+                    <div>
+                      <p className="font-bold text-white text-sm">{item.subject}</p>
+                      <p className="text-[10px] text-slate-500">Log ID: {item.id}</p>
+                    </div>
                   </div>
 
-                ))}
-
-              </div>
-
+                  {item.is_present ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1 font-bold text-emerald-400">
+                      <CheckCircle2 size={14} />
+                      Present
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 border border-rose-500/20 px-3.5 py-1 font-bold text-rose-400">
+                      <XCircle size={14} />
+                      Absent
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
 
-            {/* MODAL FOOTER */}
-
-            <div className="border-t border-slate-200 p-4 text-right">
-
+            <div className="pt-3 border-t border-slate-800 flex justify-end">
               <button
                 onClick={() => setSelectedDate(null)}
-                className="rounded-xl bg-slate-100 px-5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200"
+                className="rounded-xl border border-slate-800 bg-slate-950 px-5 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-800 cursor-pointer"
               >
-                Close
+                Close Details
               </button>
-
             </div>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 };

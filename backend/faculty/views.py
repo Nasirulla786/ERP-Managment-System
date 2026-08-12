@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 
-
 from hod.models import Subject, TimetableEntry
 from hod.serializer import SubjectSerializer, TimetableEntrySerializer
 from student.models import StudentProfile
@@ -24,36 +23,27 @@ class CreateFacultyProfile(APIView):
         if image:
             image_url = upload_image(image)
             data["image"] = image_url
-        serialize = FacultyProfileSerializer(data = data)
+        serialize = FacultyProfileSerializer(data=data)
         if serialize.is_valid():
-            serialize.save(profile = request.user.user_profile)
+            serialize.save(profile=request.user.user_profile)
             return Response(
                 {
                     "message": "Faculty profile created successfully",
-                    "data": serialize.data
+                    "data": serialize.data,
                 },
-                status=201
+                status=201,
             )
 
         print(serialize.errors)
 
 
-
-
 class GetCurrentFaculty(APIView):
-    def get(self , request):
+    def get(self, request):
         profile = request.user.user_profile
-        student = FacultyProfile.objects.get(profile = profile)
+        student = FacultyProfile.objects.get(profile=profile)
         serializer = FacultyProfileSerializer(student)
 
-        return Response(
-                    {
-                        "data":serializer.data
-                    },
-                    status=201
-                )
-
-
+        return Response({"data": serializer.data}, status=201)
 
 
 class UpdateSubject(APIView):
@@ -68,10 +58,7 @@ class UpdateSubject(APIView):
 
         if not subject:
             return Response(
-                {
-                    "message": "Subject is required"
-                },
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "Subject is required"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         try:
@@ -80,10 +67,7 @@ class UpdateSubject(APIView):
 
         except FacultyProfile.DoesNotExist:
             return Response(
-                {
-                    "message": "Faculty not found"
-                },
-                status=status.HTTP_404_NOT_FOUND
+                {"message": "Faculty not found"}, status=status.HTTP_404_NOT_FOUND
             )
 
         faculty.assigned_subject = subject
@@ -95,23 +79,20 @@ class UpdateSubject(APIView):
                 "data": {
                     "id": faculty.id,
                     "name": faculty.name,
-                    "assigned_subject": faculty.assigned_subject
-                }
+                    "assigned_subject": faculty.assigned_subject,
+                },
             },
-            status=status.HTTP_200_OK
+            status=status.HTTP_200_OK,
         )
 
 
-
-
 class MyStudents(APIView):
-    def get(self , request):
-        faculty = FacultyProfile.objects.get(profile = request.user.user_profile)
+    def get(self, request):
+        faculty = FacultyProfile.objects.get(profile=request.user.user_profile)
 
-        students = StudentProfile.objects.filter(department = faculty.department)
-        serialize = StudentProfileSerializer(students , many=True)
+        students = StudentProfile.objects.filter(department=faculty.department)
+        serialize = StudentProfileSerializer(students, many=True)
         return Response(serialize.data, status=200)
-
 
 
 class GetMyDepartmentSubjects(APIView):
@@ -119,19 +100,15 @@ class GetMyDepartmentSubjects(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        hod = FacultyProfile.objects.get(profile = request.user.user_profile)
+        hod = FacultyProfile.objects.get(profile=request.user.user_profile)
 
-        subjects = Subject.objects.filter(department=hod.department).order_by("-created_at")
-
-        serializer = SubjectSerializer(
-            subjects,
-            many=True
+        subjects = Subject.objects.filter(department=hod.department).order_by(
+            "-created_at"
         )
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
+        serializer = SubjectSerializer(subjects, many=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class CreateAttendance(APIView):
@@ -140,40 +117,30 @@ class CreateAttendance(APIView):
 
         print(request.data)
 
-        serializer = AttendanceSerialize(
-            data=request.data,
-            many=True
-        )
+        serializer = AttendanceSerialize(data=request.data, many=True)
         # print(serializer)
 
         if serializer.is_valid():
             serializer.save()
 
             return Response(
-                {
-                    "message": "Attendance marked successfully",
-                    "data": serializer.data
-                },
-                status=status.HTTP_201_CREATED
+                {"message": "Attendance marked successfully", "data": serializer.data},
+                status=status.HTTP_201_CREATED,
             )
         else:
             print(serializer.errors)
 
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetAttendance(APIView):
-    def get(self , request , subject):
+    def get(self, request, subject):
         date = request.GET.get("date")
-        myAttendance = Attendance.objects.filter(subject=subject ,date=date)
-        serialize = AttendanceSerialize(myAttendance , many=True)
+        myAttendance = Attendance.objects.filter(subject=subject, date=date)
+        serialize = AttendanceSerialize(myAttendance, many=True)
         return Response(
             serialize.data,
         )
-
 
 
 class AttendanceHistory(APIView):
@@ -182,16 +149,6 @@ class AttendanceHistory(APIView):
 
         attendance = Attendance.objects.all().order_by("-date")
 
-        serializer = AttendanceSerialize(
-            attendance,
-            many=True
-        )
+        serializer = AttendanceSerialize(attendance, many=True)
 
-        return Response(
-            serializer.data,
-            status=status.HTTP_200_OK
-        )
-
-
-
-
+        return Response(serializer.data, status=status.HTTP_200_OK)

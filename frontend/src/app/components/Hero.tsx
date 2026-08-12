@@ -27,7 +27,10 @@ const Hero = () => {
 
 
     const { userData }: any = useSelector((state: RootState) => state.user)
+    console.log(userData);
     const { hodData }: any = useSelector((state: RootState) => state.hod)
+
+    console.log("thikjhdfjsdhdsf",hodData);
     const { studentData }: any = useSelector((state: RootState) => state.student)
     const { facultyData }: any = useSelector((state: RootState) => state.faculty)
 
@@ -57,7 +60,7 @@ const Hero = () => {
 
     if (userData?.user_profile?.role == "hod") {
 
-        if (hodData == undefined) {
+        if (hodData == null) {
             return <HodForm />
         }
         else {

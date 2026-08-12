@@ -126,39 +126,48 @@ class CurrentUser(APIView):
         return Response({"user":serialize.data})
 
 
-
 class ProfileView(APIView):
-    def post(self , request):
+    def post(self, request):
         try:
-            role = request.data.get("role")
-            if role not in ["student", "faculty", "hod"]:
-                return Response(
-                    {"message": "Invalid role"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            print("REQUEST USER:", request.user)
+            print("USER ID:", request.user.id)
+            print("AUTHENTICATED:", request.user.is_authenticated)
 
-            profileExist = Profile.objects.filter(role=role)
+            role = request.data.get("role")
+
+            print("ROLE:", role)
+
+            profileExist = Profile.objects.filter(
+                user=request.user,
+                role = role,
+            ).exists()
+
+            print("PROFILE EXISTS:", profileExist)
+
             if profileExist:
-                 return Response(
+                return Response(
                     {"message": "Role already Exists"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-
-
             profile = Profile.objects.create(
-                role = role,
-                user = request.user
+                role=role,
+                user=request.user
             )
 
             serialize = RoleSerlizer(profile)
 
+            return Response(
+                {"data": serialize.data},
+                status=status.HTTP_201_CREATED
+            )
 
-            return Response({"data":serialize.data} , status = status.HTTP_201_CREATED)
         except Exception as e:
             print(e)
-            return Response({"message":"Internal server error"})
-
+            return Response(
+                {"message": "Internal server error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 from rest_framework.views import APIView

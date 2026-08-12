@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Attendance, FacultyProfile
 from student.serializer import ProfileSerilzer, StudentProfileSerializer
+from student.models import StudentProfile
 
 
 class FacultyProfileSerializer(serializers.ModelSerializer):
@@ -23,7 +24,13 @@ class FacultyProfileSerializer(serializers.ModelSerializer):
 
 
 class AttendanceSerialize(serializers.ModelSerializer):
-    student = StudentProfileSerializer(read_only=True)
+    student = serializers.PrimaryKeyRelatedField(queryset=StudentProfile.objects.all())
+
     class Meta:
         model = Attendance
-        fields = ["id" ,"student","subject" ,"date" ,"is_present"]
+        fields = ["id", "student", "subject", "date", "is_present"]
+
+    # def to_representation(self, instance):
+    #     data = super().to_representation(instance)
+    #     data['student'] = StudentProfileSerializer(instance.student).data
+    #     return data

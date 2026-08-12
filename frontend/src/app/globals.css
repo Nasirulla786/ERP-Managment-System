@@ -1,2 +1,50 @@
 @import "tailwindcss";
 
+@layer utilities {
+  /* Custom scrollbar for clean UI */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  /* Glassmorphism helpers */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  /* Soft glowing shadows */
+  .shadow-glow-indigo {
+    box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.25);
+  }
+  .shadow-glow-emerald {
+    box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.25);
+  }
+
+  /* Ambient Mesh Background */
+  .bg-mesh {
+    background-color: #f8fafc;
+    background-image:
+      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.06) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+  }
+}
+
+/* Base Body Styles */
+body {
+  background-color: black;
+  color: #0f172a;
+}

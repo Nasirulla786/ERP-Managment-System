@@ -1,8 +1,8 @@
-
 "use client";
 
 import useCurrentstudent from "@/app/hooks/useCurrentStudent";
 import api from "@/app/lib/axios";
+import Navbar from "@/app/components/Navbar";
 import { RootState } from "@/redux/store";
 import {
   ArrowRight,
@@ -21,6 +21,7 @@ import {
   UserRound,
   XCircle,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -79,13 +80,9 @@ interface Subject {
 }
 
 const Page = () => {
-  /*
-   * IMPORTANT:
-   * This hook is always called at the top level.
-   */
   useCurrentstudent();
 
-  const { studentData } = useSelector(
+  const { studentData }: any = useSelector(
     (state: RootState) => state.student
   );
 
@@ -102,10 +99,6 @@ const Page = () => {
   const [loadingSubjects, setLoadingSubjects] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  // =========================================================
-  // FETCH ALL DATA
-  // =========================================================
-
   useEffect(() => {
     fetchNotices();
     fetchTimetable();
@@ -113,16 +106,11 @@ const Page = () => {
     fetchSubjects();
   }, []);
 
-  // =========================================================
-  // NOTICES
-  // =========================================================
-
   const fetchNotices = async () => {
     try {
       const response = await api.get("/department-notices/", {
         withCredentials: true,
       });
-
       setNotices(response.data);
     } catch (error) {
       console.log("Notices error:", error);
@@ -131,16 +119,11 @@ const Page = () => {
     }
   };
 
-  // =========================================================
-  // TIMETABLE
-  // =========================================================
-
   const fetchTimetable = async () => {
     try {
       const response = await api.get("/timetable/", {
         withCredentials: true,
       });
-
       setTimetable(response.data);
     } catch (error) {
       console.log("Timetable error:", error);
@@ -149,21 +132,11 @@ const Page = () => {
     }
   };
 
-  // =========================================================
-  // ATTENDANCE
-  //
-  // IMPORTANT:
-  // This is EXACTLY the same API used by /my-attendance/
-  // =========================================================
-
   const fetchAttendance = async () => {
     try {
       const response = await api.get("/my-attendance/", {
         withCredentials: true,
       });
-
-      console.log("Dashboard attendance:", response.data);
-
       setAttendance(response.data);
     } catch (error) {
       console.log("Attendance error:", error);
@@ -172,16 +145,11 @@ const Page = () => {
     }
   };
 
-  // =========================================================
-  // SUBJECTS
-  // =========================================================
-
   const fetchSubjects = async () => {
     try {
       const response = await api.get("/subjects/", {
         withCredentials: true,
       });
-
       setSubjects(response.data);
     } catch (error) {
       console.log("Subjects error:", error);
@@ -190,22 +158,10 @@ const Page = () => {
     }
   };
 
-  // =========================================================
-  // LOGOUT
-  // =========================================================
-
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
-
-      await api.post(
-        "/logout/",
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-
+      await api.post("/logout/", {}, { withCredentials: true });
       window.location.href = "/login";
     } catch (error) {
       console.log("Logout error:", error);
@@ -213,16 +169,10 @@ const Page = () => {
     }
   };
 
-  // =========================================================
-  // GREETING
-  // =========================================================
-
   const getGreeting = () => {
     const hour = new Date().getHours();
-
     if (hour < 12) return "Good morning";
     if (hour < 17) return "Good afternoon";
-
     return "Good evening";
   };
 
@@ -232,61 +182,27 @@ const Page = () => {
     day: "numeric",
   });
 
-  // =========================================================
-  // ATTENDANCE
-  //
-  // SAME LOGIC AS MY-ATTENDANCE PAGE
-  // =========================================================
-
   const totalClasses = attendance.length;
-
-  const presentClasses = attendance.filter(
-    (item) => item.is_present === true
-  ).length;
-
-  const absentClasses = attendance.filter(
-    (item) => item.is_present === false
-  ).length;
+  const presentClasses = attendance.filter((item) => item.is_present === true).length;
+  const absentClasses = attendance.filter((item) => item.is_present === false).length;
 
   const overallAttendance =
-    totalClasses === 0
-      ? 0
-      : Math.round((presentClasses / totalClasses) * 100);
-
-  // =========================================================
-  // ATTENDANCE STATUS
-  // =========================================================
+    totalClasses === 0 ? 0 : Math.round((presentClasses / totalClasses) * 100);
 
   const attendanceStatus =
     overallAttendance >= 85
-      ? "Excellent"
+      ? "Excellent Performance"
       : overallAttendance >= 75
-      ? "Good"
+      ? "Good Standing"
       : overallAttendance >= 65
       ? "Needs Attention"
-      : "Low Attendance";
-
-  // =========================================================
-  // SUBJECT ATTENDANCE
-  //
-  // Use SAME attendance API records.
-  // Null-date records are NOT removed here because the
-  // /my-attendance/ overall percentage includes all records.
-  // =========================================================
+      : "Low Attendance Warning";
 
   const subjectAttendance = subjects.map((subject) => {
-    const records = attendance.filter(
-      (item) => item.subject === subject.name
-    );
-
-    const present = records.filter(
-      (item) => item.is_present === true
-    ).length;
-
+    const records = attendance.filter((item) => item.subject === subject.name);
+    const present = records.filter((item) => item.is_present === true).length;
     const total = records.length;
-
-    const percentage =
-      total === 0 ? 0 : Math.round((present / total) * 100);
+    const percentage = total === 0 ? 0 : Math.round((present / total) * 100);
 
     return {
       ...subject,
@@ -296,21 +212,8 @@ const Page = () => {
     };
   });
 
-  // =========================================================
-  // TODAY'S CLASSES
-  // =========================================================
-
-  const todayName = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-  });
-
-  const todaysClasses = timetable.filter(
-    (item) => item.day === todayName
-  );
-
-  // =========================================================
-  // INITIALS
-  // =========================================================
+  const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const todaysClasses = timetable.filter((item) => item.day === todayName);
 
   const initials = (
     student?.name ||
@@ -323,939 +226,349 @@ const Page = () => {
     .join("")
     .toUpperCase();
 
-  // =========================================================
-  // LOADING
-  // =========================================================
-
   if (!studentData || loadingAttendance) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f8fc]">
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-100">
         <div className="text-center">
-          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-[3px] border-slate-200 border-t-slate-900" />
-
-          <p className="mt-4 text-sm font-medium text-slate-500">
-            Loading dashboard...
-          </p>
+          <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-emerald-500/20 border-t-emerald-500 mb-3" />
+          <p className="text-xs font-semibold text-slate-400">Loading student dashboard...</p>
         </div>
       </div>
     );
   }
 
-  // =========================================================
-  // UI
-  // =========================================================
-
   return (
-    <div className="min-h-screen bg-[#f7f8fc] text-slate-900">
+    <div className="min-h-screen bg-slate-950 font-sans text-slate-100 pb-16">
+      {/* Top Navbar Component */}
+      <Navbar
+        role="Student"
+        userName={student?.name || student?.profile?.user?.username}
+        userSubtitle={student?.enrollment_no}
+        userImage={student?.image}
+      />
 
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
-
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
-
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
-              <GraduationCap size={21} />
+      {/* Hero Header Banner */}
+      <div className="relative overflow-hidden bg-slate-900 border-b border-slate-800 py-10 px-4 sm:px-8">
+        <div className="absolute -top-32 -left-32 h-80 w-80 rounded-full bg-emerald-600/20 blur-3xl pointer-events-none" />
+        <div className="mx-auto max-w-7xl relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/20 uppercase tracking-widest mb-3">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              {today}
             </div>
 
-            <div>
-              <p className="text-[15px] font-bold tracking-tight text-slate-900">
-                Student Portal
-              </p>
+            <h1 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              {getGreeting()},{" "}
+              <span className="text-emerald-400">
+                {student?.name || student?.profile?.user?.username || "Student"}
+              </span>
+            </h1>
 
-              <p className="text-xs text-slate-400">
-                Academic Management System
-              </p>
-            </div>
+            <p className="mt-1.5 text-sm text-slate-400 max-w-xl leading-relaxed">
+              Stay updated with your daily timetable schedule, overall attendance metrics, enrolled subjects, and department announcements.
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
-
-            <div className="hidden items-center gap-3 sm:flex">
-
-              <div className="text-right">
-                <p className="text-sm font-semibold text-slate-800">
-                  {student?.name ||
-                    student?.profile?.user?.username ||
-                    "Student"}
-                </p>
-
-                <p className="text-xs text-slate-400">
-                  {student?.enrollment_no ||
-                    student?.student_id ||
-                    "Student"}
-                </p>
-              </div>
-
-              {student?.image ? (
-                <img
-                  src={student.image}
-                  alt="Student"
-                  className="h-10 w-10 rounded-full object-cover ring-2 ring-slate-100"
-                />
-              ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
-                  {initials}
-                </div>
-              )}
-
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-2.5 backdrop-blur">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                Course Degree
+              </p>
+              <p className="text-sm font-bold text-white">{student?.course || "BCA"}</p>
             </div>
 
-            <button
-              onClick={handleLogout}
-              disabled={loggingOut}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <LogOut size={17} />
-
-              <span className="hidden sm:block">
-                {loggingOut ? "Logging out..." : "Logout"}
-              </span>
-            </button>
-
+            <div className="rounded-2xl border border-slate-800 bg-slate-950/80 px-4 py-2.5 backdrop-blur">
+              <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                Semester
+              </p>
+              <p className="text-sm font-bold text-emerald-400">Semester {student?.semester || "-"}</p>
+            </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
-
-      <main className="mx-auto max-w-7xl px-5 py-7 lg:px-8 lg:py-9">
-
-        {/* ===================================================
-            WELCOME
-        =================================================== */}
-
-        <section className="mb-8">
-
-          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
-
-            <div>
-
-              <div className="mb-2 flex items-center gap-2 text-xs font-medium text-slate-400">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                {today}
-              </div>
-
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-                {getGreeting()},{" "}
-                {student?.name ||
-                  student?.profile?.user?.username ||
-                  "Student"}
-              </h1>
-
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Stay updated with your classes, attendance and academic
-                performance.
-              </p>
-
-            </div>
-
-            <div className="flex items-center gap-2">
-
-              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                  Course
-                </p>
-
-                <p className="mt-1 text-sm font-semibold text-slate-800">
-                  {student?.course || "BCA"}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-                  Semester
-                </p>
-
-                <p className="mt-1 text-sm font-semibold text-slate-800">
-                  {student?.semester || "-"}
-                </p>
-              </div>
-
-            </div>
-
-          </div>
-        </section>
-
-        {/* ===================================================
-            PROFILE + ATTENDANCE
-        =================================================== */}
-
-        <section className="grid gap-5 lg:grid-cols-3">
-
-          {/* PROFILE */}
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2">
-
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-
+      <div className="mx-auto max-w-7xl px-4 sm:px-8 mt-8 space-y-8">
+        {/* Profile Card + Overall Attendance Gauge */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Profile Card */}
+          <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 sm:p-8 shadow-xl lg:col-span-2">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
               {student?.image ? (
                 <img
                   src={student.image}
-                  alt="Student profile"
-                  className="h-24 w-24 rounded-2xl object-cover ring-1 ring-slate-200"
+                  alt="Student Profile"
+                  className="h-24 w-24 rounded-2xl border-2 border-emerald-500/40 object-cover shadow-xl ring-4 ring-emerald-500/10 shrink-0"
                 />
               ) : (
-                <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-2xl font-bold text-white">
+                <div className="h-24 w-24 rounded-2xl bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-xl font-bold text-emerald-400 shrink-0">
                   {initials}
                 </div>
               )}
 
-              <div className="min-w-0 flex-1">
-
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  <UserRound size={14} />
-                  Student Profile
+              <div className="flex-1 text-center sm:text-left">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-0.5 text-xs font-bold text-emerald-400 border border-emerald-500/20 mb-2">
+                  <UserRound size={13} />
+                  Student Academic Profile
                 </div>
 
-                <h2 className="mt-2 truncate text-2xl font-bold text-slate-900">
-                  {student?.name ||
-                    student?.profile?.user?.username ||
-                    "Student"}
+                <h2 className="text-2xl font-extrabold text-white">
+                  {student?.name || student?.profile?.user?.username || "Student"}
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  {student?.enrollment_no ||
-                    student?.student_id ||
-                    "Enrollment number unavailable"}
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Enrollment: {student?.enrollment_no || student?.student_id || "-"}
                 </p>
 
-                <div className="mt-4 flex flex-wrap gap-2">
-
-                  <span className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
-                    <Building2 size={14} />
+                <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-2.5 text-xs">
+                  <span className="flex items-center gap-1.5 rounded-xl bg-slate-950 border border-slate-800 px-3 py-1.5 font-semibold text-slate-300">
+                    <Building2 size={14} className="text-emerald-400" />
                     {student?.department || "-"}
                   </span>
-
-                  <span className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
-                    <GraduationCap size={14} />
+                  <span className="flex items-center gap-1.5 rounded-xl bg-slate-950 border border-slate-800 px-3 py-1.5 font-semibold text-slate-300">
+                    <GraduationCap size={14} className="text-emerald-400" />
                     {student?.course || "BCA"}
                   </span>
-
-                  <span className="rounded-lg bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
-                    Semester {student?.semester || "-"}
-                  </span>
-
-                </div>
-
-              </div>
-
-              <div className="hidden rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 sm:block">
-                <div className="flex items-center gap-2 text-emerald-700">
-                  <CheckCircle2 size={16} />
-
-                  <span className="text-xs font-semibold">
-                    Active
-                  </span>
                 </div>
               </div>
-
             </div>
           </div>
 
-          {/* ATTENDANCE */}
-
+          {/* Overall Attendance Card Widget */}
           <Link
             href="/pages/my-attendance"
-            className="rounded-2xl bg-slate-900 p-6 text-white transition hover:bg-slate-800"
+            className="group rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-xl flex flex-col justify-between hover:border-emerald-500/40 transition-all"
           >
+            <div>
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    Overall Attendance
+                  </p>
+                  <h2 className="mt-2 text-4xl font-black text-white">
+                    {overallAttendance}%
+                  </h2>
+                </div>
 
-            <div className="flex items-start justify-between">
-
-              <div>
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                  Overall Attendance
-                </p>
-
-                <h2 className="mt-2 text-4xl font-bold">
-                  {overallAttendance}%
-                </h2>
+                <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                  <TrendingUp size={20} />
+                </div>
               </div>
 
-              <div className="rounded-xl bg-white/10 p-3">
-                <TrendingUp size={21} />
+              {/* Progress Bar */}
+              <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-slate-950 border border-slate-800">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${
+                    overallAttendance >= 75
+                      ? "bg-gradient-to-r from-emerald-500 to-teal-400"
+                      : "bg-gradient-to-r from-rose-500 to-pink-500"
+                  }`}
+                  style={{ width: `${overallAttendance}%` }}
+                />
               </div>
 
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <span className="font-semibold text-emerald-400">{attendanceStatus}</span>
+                <span className="text-slate-500">Target: 75%</span>
+              </div>
             </div>
 
-            <div className="mt-6 h-2 overflow-hidden rounded-full bg-white/10">
-              <div
-                className={`h-full rounded-full transition-all duration-700 ${
-                  overallAttendance >= 75
-                    ? "bg-emerald-400"
-                    : "bg-red-400"
-                }`}
-                style={{
-                  width: `${overallAttendance}%`,
-                }}
-              />
-            </div>
-
-            <div className="mt-4 flex items-center justify-between">
-
-              <span className="text-xs text-slate-400">
-                {attendanceStatus}
-              </span>
-
-              <span className="text-xs text-slate-400">
-                Target: 75%
-              </span>
-
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-2">
-
-              <div className="rounded-xl bg-white/5 p-3">
-                <p className="text-xs text-slate-400">
-                  Present
-                </p>
-
-                <p className="mt-1 text-xl font-bold text-emerald-400">
-                  {presentClasses}
-                </p>
+            <div className="mt-5 grid grid-cols-2 gap-3 text-xs pt-4 border-t border-slate-800/80">
+              <div className="rounded-xl bg-slate-950 p-2.5 border border-slate-800/80">
+                <p className="text-slate-500">Present</p>
+                <p className="text-lg font-bold text-emerald-400 mt-0.5">{presentClasses}</p>
               </div>
 
-              <div className="rounded-xl bg-white/5 p-3">
-                <p className="text-xs text-slate-400">
-                  Absent
-                </p>
-
-                <p className="mt-1 text-xl font-bold text-red-400">
-                  {absentClasses}
-                </p>
+              <div className="rounded-xl bg-slate-950 p-2.5 border border-slate-800/80">
+                <p className="text-slate-500">Absent</p>
+                <p className="text-lg font-bold text-rose-400 mt-0.5">{absentClasses}</p>
               </div>
-
             </div>
-
           </Link>
-        </section>
+        </div>
 
-        {/* ===================================================
-            STATS
-        =================================================== */}
-
-        <section className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
+        {/* Metric Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <StatCard
-            title="Subjects"
+            title="Enrolled Subjects"
             value={loadingSubjects ? "..." : subjects.length}
-            subtitle="Currently enrolled"
+            subtitle="Current semester"
             icon={<BookOpen size={20} />}
+            color="purple"
           />
-
           <StatCard
             title="Attendance"
             value={loadingAttendance ? "..." : `${overallAttendance}%`}
             subtitle={`${presentClasses} classes attended`}
             icon={<ClipboardCheck size={20} />}
+            color="emerald"
           />
-
           <StatCard
             title="Today's Classes"
             value={loadingTimetable ? "..." : todaysClasses.length}
-            subtitle="Scheduled for today"
+            subtitle="Scheduled lectures"
             icon={<CalendarDays size={20} />}
+            color="blue"
           />
-
           <StatCard
             title="Notices"
             value={loadingNotices ? "..." : notices.length}
             subtitle="Department updates"
             icon={<Bell size={20} />}
+            color="amber"
           />
+        </div>
 
-        </section>
-
-        {/* ===================================================
-            SUBJECT ATTENDANCE
-        =================================================== */}
-
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
-
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-
+        {/* Subject Attendance Breakdown */}
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 sm:p-7 shadow-xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Subject Attendance
+              <h2 className="text-lg font-bold text-white">
+                Course Subject Attendance
               </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Monitor your attendance across enrolled subjects.
+              <p className="text-xs text-slate-400">
+                Monitor your present vs absent record across individual subjects
               </p>
             </div>
 
             <Link
               href="/pages/my-attendance"
-              className="flex items-center gap-1 text-sm font-semibold text-slate-700 transition hover:text-indigo-600"
+              className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:underline"
             >
-              View details
+              <span>View Attendance History</span>
               <ChevronRight size={16} />
             </Link>
-
           </div>
 
-          <div className="mt-6 divide-y divide-slate-100">
-
+          <div className="divide-y divide-slate-800/80">
             {loadingSubjects || loadingAttendance ? (
               [1, 2, 3].map((item) => (
-                <div
-                  key={item}
-                  className="py-5 first:pt-0"
-                >
-                  <div className="h-4 w-40 animate-pulse rounded bg-slate-100" />
-
-                  <div className="mt-3 h-2 animate-pulse rounded bg-slate-100" />
+                <div key={item} className="py-4">
+                  <div className="h-4 w-40 animate-pulse rounded bg-slate-800" />
+                  <div className="mt-2 h-2 animate-pulse rounded bg-slate-800" />
                 </div>
               ))
             ) : subjectAttendance.length === 0 ? (
-
-              <div className="py-12 text-center">
-
-                <BookOpen
-                  size={30}
-                  className="mx-auto text-slate-300"
-                />
-
-                <p className="mt-3 text-sm font-medium text-slate-600">
-                  No subject attendance available
+              <div className="py-12 text-center text-slate-500">
+                <BookOpen size={36} className="mx-auto text-slate-700 mb-2" />
+                <p className="text-xs font-semibold text-slate-400">
+                  No subject attendance records found
                 </p>
-
               </div>
-
             ) : (
-
               subjectAttendance.slice(0, 6).map((subject) => (
-
-                <div
-                  key={subject.id}
-                  className="py-5 first:pt-0 last:pb-0"
-                >
-
-                  <div className="flex items-center justify-between">
-
-                    <div className="min-w-0">
-
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        {subject.name}
+                <div key={subject.id} className="py-4 first:pt-0 last:pb-0 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <div>
+                      <p className="font-bold text-white text-sm">{subject.name}</p>
+                      <p className="text-slate-500 text-[11px] mt-0.5">
+                        {subject.subject_code} • {subject.subject_type || "Core"}
                       </p>
-
-                      <p className="mt-1 text-xs text-slate-400">
-                        {subject.subject_code} · {subject.subject_type}
-                      </p>
-
                     </div>
 
-                    <div className="ml-4 text-right">
-
+                    <div className="text-right">
                       <p
-                        className={`text-sm font-bold ${
+                        className={`font-black text-sm ${
                           subject.total === 0
-                            ? "text-slate-400"
+                            ? "text-slate-500"
                             : subject.percentage >= 75
-                            ? "text-emerald-600"
-                            : "text-red-500"
+                            ? "text-emerald-400"
+                            : "text-rose-400"
                         }`}
                       >
-                        {subject.total === 0
-                          ? "N/A"
-                          : `${subject.percentage}%`}
+                        {subject.total === 0 ? "N/A" : `${subject.percentage}%`}
                       </p>
-
-                      <p className="mt-1 text-[11px] text-slate-400">
-                        {subject.present}/{subject.total}
+                      <p className="text-[10px] font-semibold text-slate-500">
+                        {subject.present}/{subject.total} Present
                       </p>
-
                     </div>
-
                   </div>
 
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
-
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-950 border border-slate-800/80">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         subject.total === 0
-                          ? "bg-slate-200"
+                          ? "bg-slate-800"
                           : subject.percentage >= 75
                           ? "bg-emerald-500"
-                          : "bg-red-500"
+                          : "bg-rose-500"
                       }`}
-                      style={{
-                        width: `${subject.percentage}%`,
-                      }}
+                      style={{ width: `${subject.percentage}%` }}
                     />
-
                   </div>
-
                 </div>
-
               ))
             )}
-
           </div>
-        </section>
-
-        {/* ===================================================
-            QUICK ACCESS
-        =================================================== */}
-
-        <section className="mt-8">
-
-          <div className="mb-4">
-            <h2 className="text-lg font-bold text-slate-900">
-              Quick Access
-            </h2>
-
-            <p className="mt-1 text-sm text-slate-500">
-              Access frequently used academic services.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
-            <ActionCard
-              title="Attendance"
-              description="View attendance records"
-              icon={<ClipboardCheck size={20} />}
-              sendLink="/pages/my-attendance"
-            />
-
-            <ActionCard
-              title="Timetable"
-              description="Check your class schedule"
-              icon={<CalendarDays size={20} />}
-              sendLink="/pages/timetable"
-            />
-
-            <ActionCard
-              title="Assignments"
-              description="View pending assignments"
-              icon={<FileText size={20} />}
-              sendLink="/pages/assignments"
-            />
-
-            <ActionCard
-              title="Subjects"
-              description="Explore enrolled subjects"
-              icon={<BookOpen size={20} />}
-              sendLink="/pages/subjects"
-            />
-
-          </div>
-        </section>
-
-        {/* ===================================================
-            TODAY + NOTICES
-        =================================================== */}
-
-        <section className="mt-8 grid gap-5 lg:grid-cols-2">
-
-          {/* TODAY'S CLASSES */}
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  Today's Classes
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Your schedule for today.
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-slate-100 p-3 text-slate-700">
-                <Clock3 size={20} />
-              </div>
-
-            </div>
-
-            <div className="mt-6 space-y-2">
-
-              {loadingTimetable ? (
-
-                [1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="h-16 animate-pulse rounded-xl bg-slate-100"
-                  />
-                ))
-
-              ) : todaysClasses.length === 0 ? (
-
-                <div className="rounded-xl border border-dashed border-slate-200 px-5 py-10 text-center">
-
-                  <CalendarDays
-                    size={30}
-                    className="mx-auto text-slate-300"
-                  />
-
-                  <p className="mt-3 text-sm font-semibold text-slate-600">
-                    No classes today
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    You have no scheduled classes for today.
-                  </p>
-
-                </div>
-
-              ) : (
-
-                todaysClasses.slice(0, 4).map((item) => (
-
-                  <div
-                    key={item.id}
-                    className="group flex items-center justify-between rounded-xl border border-slate-100 p-4 transition hover:border-slate-200 hover:bg-slate-50"
-                  >
-
-                    <div className="flex min-w-0 items-center gap-3">
-
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-                        <BookOpen size={17} />
-                      </div>
-
-                      <div className="min-w-0">
-
-                        <p className="truncate text-sm font-semibold text-slate-800">
-                          {item.subject}
-                        </p>
-
-                        <p className="mt-1 truncate text-xs text-slate-500">
-                          {typeof item.faculty === "string"
-                            ? item.faculty
-                            : item.faculty?.name || "Faculty"}
-                        </p>
-
-                        <p className="mt-1 text-[11px] text-slate-400">
-                          Room {item.room}
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                    <div className="ml-4 shrink-0 text-right">
-
-                      <p className="text-sm font-bold text-slate-800">
-                        {item.start_time}
-                      </p>
-
-                      <p className="mt-1 text-[11px] text-slate-400">
-                        {item.end_time}
-                      </p>
-
-                    </div>
-
-                  </div>
-                ))
-              )}
-
-            </div>
-
-            {todaysClasses.length > 4 && (
-              <Link
-                href="/pages/timetable"
-                className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-slate-50 py-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-              >
-                View complete timetable
-                <ArrowRight size={15} />
-              </Link>
-            )}
-
-          </div>
-
-          {/* NOTICES */}
-
-          <div className="rounded-2xl border border-slate-200 bg-white p-6">
-
-            <div className="flex items-center justify-between">
-
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  Department Notices
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Latest announcements and updates.
-                </p>
-              </div>
-
-              <div className="rounded-xl bg-slate-100 p-3 text-slate-700">
-                <Megaphone size={20} />
-              </div>
-
-            </div>
-
-            <div className="mt-6 space-y-2">
-
-              {loadingNotices ? (
-
-                [1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="h-16 animate-pulse rounded-xl bg-slate-100"
-                  />
-                ))
-
-              ) : notices.length === 0 ? (
-
-                <div className="rounded-xl border border-dashed border-slate-200 px-5 py-10 text-center">
-
-                  <Megaphone
-                    size={30}
-                    className="mx-auto text-slate-300"
-                  />
-
-                  <p className="mt-3 text-sm font-semibold text-slate-600">
-                    No new notices
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    Department announcements will appear here.
-                  </p>
-
-                </div>
-
-              ) : (
-
-                notices.slice(0, 4).map((notice) => (
-
-                  <div
-                    key={notice.id}
-                    className="flex gap-3 rounded-xl border border-slate-100 p-4 transition hover:border-slate-200 hover:bg-slate-50"
-                  >
-
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
-                      <Bell size={16} />
-                    </div>
-
-                    <div className="min-w-0">
-
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        {notice.title}
-                      </p>
-
-                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
-                        {notice.description}
-                      </p>
-
-                    </div>
-
-                  </div>
-                ))
-              )}
-
-            </div>
-
-          </div>
-
-        </section>
-
-        {/* ===================================================
-            ACADEMIC INFORMATION
-        =================================================== */}
-
-        <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
-
-          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Academic Information
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-500">
-                Your registered academic details.
-              </p>
-            </div>
-
-            <span className="w-fit rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
-              Active Student
-            </span>
-
-          </div>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-
-            <InfoItem
-              title="Enrollment Number"
-              value={student?.enrollment_no || "-"}
-            />
-
-            <InfoItem
-              title="Course"
-              value={student?.course || "-"}
-            />
-
-            <InfoItem
-              title="Department"
-              value={student?.department || "-"}
-            />
-
-            <InfoItem
-              title="Semester"
-              value={student?.semester || "-"}
-            />
-
-          </div>
-
-        </section>
-
-        {/* ===================================================
-            FOOTER STATUS
-        =================================================== */}
-
-        <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-5 py-4">
-
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-              <CheckCircle2 size={16} />
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold text-slate-700">
-                Account active
-              </p>
-
-              <p className="mt-0.5 text-[11px] text-slate-400">
-                Your academic portal access is active.
-              </p>
-            </div>
-
-          </div>
-
-          <p className="hidden text-xs text-slate-400 sm:block">
-            Student Portal
-          </p>
-
         </div>
 
-      </main>
+        {/* Quick Portal Navigation Links */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <Link
+            href="/pages/my-subjects"
+            className="group rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl transition-all hover:-translate-y-1 hover:border-purple-500/40"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20 mb-3">
+              <BookOpen size={20} />
+            </div>
+            <h3 className="font-bold text-white text-base group-hover:text-purple-400 transition-colors">
+              My Subjects
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">Explore course syllabus & marks</p>
+          </Link>
+
+          <Link
+            href="/pages/my-timetable"
+            className="group rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl transition-all hover:-translate-y-1 hover:border-blue-500/40"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20 mb-3">
+              <CalendarDays size={20} />
+            </div>
+            <h3 className="font-bold text-white text-base group-hover:text-blue-400 transition-colors">
+              My Timetable
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">View class lecture timings</p>
+          </Link>
+
+          <Link
+            href="/pages/my-attendance"
+            className="group rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl transition-all hover:-translate-y-1 hover:border-emerald-500/40"
+          >
+            <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 mb-3">
+              <ClipboardCheck size={20} />
+            </div>
+            <h3 className="font-bold text-white text-base group-hover:text-emerald-400 transition-colors">
+              My Attendance
+            </h3>
+            <p className="text-xs text-slate-400 mt-1">Detailed date-wise attendance</p>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
 
-// =========================================================
-// STAT CARD
-// =========================================================
+const StatCard = ({ title, value, subtitle, icon, color }: any) => {
+  const colorMap: any = {
+    purple: "text-purple-400 border-purple-500/20 bg-purple-500/10",
+    emerald: "text-emerald-400 border-emerald-500/20 bg-emerald-500/10",
+    blue: "text-blue-400 border-blue-500/20 bg-blue-500/10",
+    amber: "text-amber-400 border-amber-500/20 bg-amber-500/10",
+  };
 
-const StatCard = ({
-  title,
-  value,
-  subtitle,
-  icon,
-}: {
-  title: string;
-  value: string | number;
-  subtitle: string;
-  icon: React.ReactNode;
-}) => {
   return (
-    <div className="group rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm">
-
+    <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl">
       <div className="flex items-start justify-between">
-
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            {title}
-          </p>
-
-          <h3 className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-            {value}
-          </h3>
-
-          <p className="mt-1 text-xs text-slate-400">
-            {subtitle}
-          </p>
+          <p className="text-xs font-medium text-slate-400">{title}</p>
+          <h3 className="mt-2 text-2xl font-black text-white">{value}</h3>
+          <p className="mt-1 text-[11px] text-slate-500">{subtitle}</p>
         </div>
 
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition group-hover:bg-slate-900 group-hover:text-white">
-          {icon}
-        </div>
-
+        <div className={`rounded-2xl p-3 border ${colorMap[color]}`}>{icon}</div>
       </div>
-
-    </div>
-  );
-};
-
-// =========================================================
-// ACTION CARD
-// =========================================================
-
-const ActionCard = ({
-  title,
-  description,
-  icon,
-  sendLink,
-}: {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  sendLink: string;
-}) => {
-  return (
-    <Link
-      href={sendLink}
-      className="group rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm"
-    >
-
-      <div className="flex items-center justify-between">
-
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition group-hover:bg-slate-900 group-hover:text-white">
-          {icon}
-        </div>
-
-        <ArrowRight
-          size={17}
-          className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-slate-800"
-        />
-
-      </div>
-
-      <h3 className="mt-5 text-sm font-bold text-slate-800">
-        {title}
-      </h3>
-
-      <p className="mt-1 text-xs leading-5 text-slate-500">
-        {description}
-      </p>
-
-    </Link>
-  );
-};
-
-// =========================================================
-// INFO ITEM
-// =========================================================
-
-const InfoItem = ({
-  title,
-  value,
-}: {
-  title: string;
-  value: string | number;
-}) => {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-
-      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
-        {title}
-      </p>
-
-      <p className="mt-2 truncate text-sm font-semibold text-slate-800">
-        {value}
-      </p>
-
     </div>
   );
 };
 
 export default Page;
+  
